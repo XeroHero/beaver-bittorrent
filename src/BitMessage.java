@@ -1,7 +1,5 @@
 /* BitMessage.java:  for constructing and parsing BitTorrent messages */
 /* Christopher Chute */
-/* CPSC 433 - Yang Yang */
-/* Final Project: May 2, 2016 */
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;

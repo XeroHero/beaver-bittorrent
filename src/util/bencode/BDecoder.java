@@ -1,11 +1,8 @@
 /* Bencoder.java: Facilities for bencoding (cf. BitTorrent) */
+/* Christopher Chute */
 
 /* Reference: adapted from @frazboyz implementation on BitBucket */
 /* https://bitbucket.org/frazboyz/bencoder */
-
-/* Christopher Chute */
-/* CPSC 433 - Yang Yang */
-/* Final Project: May 2, 2016 */
 
 /* String of encoded data passed into read function */
 /* read function parses all tokens, returns BObject[] */

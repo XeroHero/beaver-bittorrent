@@ -1,7 +1,5 @@
 /* BitLibrary.java: various library functions for BitTorrent */
 /* Christopher Chute */
-/* CPSC 433 - Yang Yang */
-/* Final Project: May 2, 2016 */
 
 package util.lib;
 

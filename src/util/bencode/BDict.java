@@ -1,7 +1,8 @@
 /* BDict.java: the BObject implementation of a Bencode dictionary */
 /* Christopher Chute */
-/* CPSC 433 - Yang Yang */
-/* Final Project: May 2, 2016 */
+
+/* Reference: adapted from @frazboyz implementation on BitBucket */
+/* https://bitbucket.org/frazboyz/bencoder */
 
 package util.bencode;
 

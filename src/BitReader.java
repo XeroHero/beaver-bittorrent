@@ -1,8 +1,6 @@
 /* BitReader.java:  runnable class to read from a connected BitPeer */
 /* main purpose is to provide non-blocking reading of messages into messageQ */
 /* Christopher Chute */
-/* CPSC 433 - Yang Yang */
-/* Final Project: May 2, 2016 */
 
 import java.nio.ByteBuffer;
 import java.io.InputStream;

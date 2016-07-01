@@ -1,11 +1,8 @@
 /* BString.java:  the BObject implementation of a Bencode string*/
+/* Christopher Chute */
 
 /* Reference: adapted from @frazboyz implementation on BitBucket */
 /* https://bitbucket.org/frazboyz/bencoder */
-
-/* Christopher Chute */
-/* CPSC 433 - Yang Yang */
-/* Final Project: May 2, 2016 */
 
 package util.bencode;
 

@@ -1,7 +1,5 @@
 /* BitClient.java:  client for BitTorrent protocol */
 /* Christopher Chute */
-/* CPSC 433 - Yang Yang */
-/* Final Project: May 2, 2016 */
 
 import java.nio.file.*;
 import java.io.File;

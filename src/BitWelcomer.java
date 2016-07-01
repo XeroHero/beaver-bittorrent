@@ -1,8 +1,6 @@
 /* BitWelcomer.java:  runnable class to welcome incoming BitTorrent peers */
 /* main purpose is to provide non-blocking acceptance of new peers */
 /* Christopher Chute */
-/* CPSC 433 - Yang Yang */
-/* Final Project: May 2, 2016 */
 
 import java.net.Socket;
 import java.net.ServerSocket;

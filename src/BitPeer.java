@@ -1,7 +1,5 @@
 /* BitPeer.java: class for connection to a peer in BitTorrent */
 /* Christopher Chute */
-/* CPSC 433 - Yang Yang */
-/* Final Project: May 2, 2016 */
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;

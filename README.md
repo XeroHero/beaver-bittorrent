@@ -1,4 +1,4 @@
-## Overview
+# Beaver BitTorrent
 This is an ongoing project to develop a simplified BitTorrent client from scratch, with the long-term goal being a stand-alone client that seeds with swarms in the wild. As it currently stands, the following simplifications are in place:
 
 1. The client doesn't use standard choking/unchoking algorithms. It uses random unchoking of a maximum of four peers at a time.

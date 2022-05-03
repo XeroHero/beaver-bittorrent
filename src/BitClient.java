@@ -1,28 +1,21 @@
 /* BitClient.java:  client for BitTorrent protocol */
 /* Christopher Chute */
 
-import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
-import java.io.File;
-import java.io.RandomAccessFile;
-import java.io.IOException;
-import java.io.FileOutputStream;
-import java.io.BufferedOutputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Random;
-import java.util.Set;
-import java.net.Socket;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
+import util.bencode.BDecoder;
+import util.bencode.BDict;
+import util.bencode.BObject;
+import util.lib.BitLibrary;
 
-import util.bencode.*;        // interface for Bencoded objects
-import util.lib.BitLibrary;   // various library functions for BitTorrent
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 
 /* BitClient:  manages a BitTorrent connection session */
 @SuppressWarnings("ALL")

@@ -7,7 +7,7 @@ import java.nio.charset.StandardCharsets;
 public class BitMessage {
     private static final int INTEGER_LENGTH = 4;
     /* Unpacked Message: info about the contents of the message payload */
-    private MessageType type;      // type of BitMessage, cf. client protocol
+    private final MessageType type;      // type of BitMessage, cf. client protocol
     private int blockLength = -1;  // length of a requested block
     private int index = -1;        // index of piece containing requested block
     private int begin = -1;        // offset within piece of a requested block
@@ -96,7 +96,7 @@ public class BitMessage {
 
     /* pack: packs a message into a byte[] to send over network */
     public byte[] pack() {
-        ByteBuffer buf = null;
+        ByteBuffer buf;
 
         if (type == MessageType.KEEP_ALIVE) {                // {0000}
             buf = ByteBuffer.allocate(INTEGER_LENGTH);
@@ -165,10 +165,7 @@ public class BitMessage {
             throw new RuntimeException("Unrecognized BitMessage type: " + type);
         }
 
-        if (buf != null) {
-            return buf.array();
-        }
-        return null;
+        return buf.array();
     }
 
     /* unpack: turns received byte[] into the corresponding BitMessage */
@@ -187,45 +184,54 @@ public class BitMessage {
 
         // handle status messages (CHOKE, UNCHOKE, INTERESTED, UNINTERESTED)
         if (len == 1) {
-            if (typeStr.equals("0")) {
-                return new BitMessage(MessageType.CHOKE);
-            } else if (typeStr.equals("1")) {
-                return new BitMessage(MessageType.UNCHOKE);
-            } else if (typeStr.equals("2")) {
-                return new BitMessage(MessageType.INTERESTED);
-            } else if (typeStr.equals("3")) {
-                return new BitMessage(MessageType.UNINTERESTED);
-            } else {
-                throw new RuntimeException("Unpack found unrecognized len=1 msg");
-            }
+            return switch (typeStr) {
+                case "0" -> new BitMessage(MessageType.CHOKE);
+                case "1" -> new BitMessage(MessageType.UNCHOKE);
+                case "2" -> new BitMessage(MessageType.INTERESTED);
+                case "3" -> new BitMessage(MessageType.UNINTERESTED);
+                default -> throw new RuntimeException("Unpack found unrecognized len=1 msg");
+            };
         }
 
         // handle HAVE, BITFIELD, REQUEST, CANCEL, PIECE messages
-        if (typeStr.equals("4")) {
-            int pieceIndex = buf.getInt();
-            return new BitMessage(MessageType.HAVE, pieceIndex);
-        } else if (typeStr.equals("5")) {
-            byte[] bitMap = new byte[len - 1];
-            buf.get(bitMap, 0, len - 1);
-            return new BitMessage(MessageType.BITFIELD, bitMap);
-        } else if (typeStr.equals("6")) {
-            int i = buf.getInt();    // index
-            int b = buf.getInt();    // begin
-            int l = buf.getInt();    // length
-            return new BitMessage(MessageType.REQUEST, i, b, l);
-        } else if (typeStr.equals("7")) {
-            int i = buf.getInt();    // index
-            int b = buf.getInt();    // begin
-            byte[] blockData = new byte[len - 9];
-            buf.get(blockData, 0, len - 9);
-            return new BitMessage(MessageType.PIECE, i, b, blockData);
-        } else if (typeStr.equals("8")) {
-            int i = buf.getInt();    // index
-            int b = buf.getInt();    // begin
-            int l = buf.getInt();    // length
-            return new BitMessage(MessageType.CANCEL, i, b, l);
-        } else {
-            throw new RuntimeException("Unpack found unrecognized MessageType");
+        switch (typeStr) {
+            case "4" -> {
+                int pieceIndex = buf.getInt();
+                return new BitMessage(MessageType.HAVE, pieceIndex);
+            }
+            case "5" -> {
+                byte[] bitMap = new byte[len - 1];
+                buf.get(bitMap, 0, len - 1);
+                return new BitMessage(MessageType.BITFIELD, bitMap);
+            }
+            case "6" -> {
+                int i = buf.getInt();    // index
+
+                int b = buf.getInt();    // begin
+
+                int l = buf.getInt();    // length
+
+                return new BitMessage(MessageType.REQUEST, i, b, l);
+            }
+            case "7" -> {
+                int i = buf.getInt();    // index
+
+                int b = buf.getInt();    // begin
+
+                byte[] blockData = new byte[len - 9];
+                buf.get(blockData, 0, len - 9);
+                return new BitMessage(MessageType.PIECE, i, b, blockData);
+            }
+            case "8" -> {
+                int i = buf.getInt();    // index
+
+                int b = buf.getInt();    // begin
+
+                int l = buf.getInt();    // length
+
+                return new BitMessage(MessageType.CANCEL, i, b, l);
+            }
+            default -> throw new RuntimeException("Unpack found unrecognized MessageType");
         }
     }
 }

@@ -2,18 +2,17 @@
 /* main purpose is to provide non-blocking reading of messages into messageQ */
 /* Christopher Chute */
 
-import java.nio.ByteBuffer;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.Queue;
-import java.util.LinkedList;
 
 public class BitReader implements Runnable {
     private static final int INT_LEN = 4;
     private static final int MSG_BACKLOG = 10;    // max outstanding messages
 
-    private InputStream inFromPeer = null;        // incoming messages
-    private Queue<BitMessage> messageQ = null;    // queue of messages
+    private final InputStream inFromPeer;        // incoming messages
+    private final Queue<BitMessage> messageQ;    // queue of messages
     private volatile boolean isStopped = false;   // for killing thread
 
     public BitReader(final InputStream inp, final Queue<BitMessage> queue) {
@@ -39,15 +38,13 @@ public class BitReader implements Runnable {
                 throw new RuntimeException("error: reader thread misaligned");
             }
             // NOTE: use ByteBuffer for integer encoding
-            ByteBuffer buf = ByteBuffer.wrap(lenBuf);    
+            ByteBuffer buf = ByteBuffer.wrap(lenBuf);
             int msgLen = buf.getInt();
 
             // read rest of message
             byte[] rcvData = new byte[INT_LEN + msgLen];
             // (i) copy over the message length
-            for (int i = 0; i < INT_LEN; ++i) {
-                rcvData[i] = lenBuf[i];
-            }
+            System.arraycopy(lenBuf, 0, rcvData, 0, INT_LEN);
             // (ii) read rest of message from inFromPeer
             try {
                 // continue reading until entire message is read

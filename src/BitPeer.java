@@ -4,35 +4,29 @@
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketException;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-import java.util.LinkedList;
-import java.util.HashSet;
-import java.util.Queue;
-import java.util.Random;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 import util.lib.BitLibrary;
 
 public class BitPeer {
     private static final int HANDSHAKE_SIZE = 68;
-    private InetSocketAddress peerAddrPort;
-    private String peerIDstring;    // hex string of SHA1
-    private byte[] peerID;
-    private long lastUsed;
+    private final InetSocketAddress peerAddrPort;
+    // hex string of SHA1
+    private final byte[] peerID;
     private boolean[] remoteBitfield = null;
     private Socket peerSocket = null;
     private BufferedOutputStream outToPeer = null;
     private BufferedInputStream inFromPeer = null;
-    private BitReader reader = null;
     private Queue<BitMessage> messageQ = null;
 
-    public HashSet<Integer> outstandingRequests = null;
+    public HashSet<Integer> outstandingRequests;
     public boolean localIsChoked;       // peer is choking this client
     public boolean remoteIsChoked;      // this client is choking peer
     public boolean localIsInterested;   // this client is interested
@@ -41,11 +35,9 @@ public class BitPeer {
     /* BitPeer(InetAddress, int): constructor for peer from command line/tracker */
     public BitPeer(InetAddress peerAddr, int peerPort) {
         this.peerAddrPort = new InetSocketAddress(peerAddr, peerPort);
-        String stringToHash = getIP().toString() + String.valueOf(getPort());
+        String stringToHash = getIP().toString() + getPort();
         peerID = BitLibrary.getSHA1(stringToHash);
-        peerIDstring = BitLibrary.bytesToHex(peerID);
-        this.lastUsed = System.currentTimeMillis();
-        this.outstandingRequests = new HashSet<Integer>();
+        this.outstandingRequests = new HashSet<>();
 
         // peers start out choked and uninterested
         this.localIsChoked = true;
@@ -59,10 +51,9 @@ public class BitPeer {
         this.peerSocket = peerSocket;
         this.peerAddrPort = new InetSocketAddress(peerSocket.getInetAddress(), 
                                                   peerSocket.getPort());
-        String stringToHash = getIP().toString() + String.valueOf(getPort());
+        String stringToHash = getIP().toString() + getPort();
         peerID = BitLibrary.getSHA1(stringToHash);
-        peerIDstring = BitLibrary.bytesToHex(peerID);
-        this.outstandingRequests = new HashSet<Integer>();
+        this.outstandingRequests = new HashSet<>();
 
         // peers start out choked and uninterested
         this.localIsChoked = true;
@@ -79,7 +70,6 @@ public class BitPeer {
         }
         // only initialize reader once handshake is complete
 
-        this.lastUsed = System.currentTimeMillis();
     }
 
     /* connect:  connect to specified peer */
@@ -96,33 +86,11 @@ public class BitPeer {
             return -1;
         }
 
-        this.lastUsed = System.currentTimeMillis();
-
         return 0;
     }
 
     /* updateLastUsed: refresh the timestamp for when last used */
     public void updateLastUsed() {
-        lastUsed = System.currentTimeMillis();
-    }
-
-    /* getLastUsed: indicate when last used */
-    public long getLastUsed() {
-        return lastUsed;
-    }
-
-    /* close: shut down reader thread and close socket */
-    public void close() {
-        if (reader != null) {
-            reader.stopThread();
-        }
-        if (peerSocket != null) {
-            try {
-                peerSocket.close();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
     }
 
     public boolean[] getBitfield() {
@@ -137,16 +105,13 @@ public class BitPeer {
         remoteBitfield[index] = true;
     }
 
-    public boolean hasPiece(int index) {
-        return this.remoteBitfield[index];
-    }
-
     /* getNextMessage: return the next message off the messageQ */
     public BitMessage getNextMessage() {
-        BitMessage msg = null;
+        BitMessage msg;
         if (messageQ == null) {
             return null;
         }
+        //noinspection SynchronizeOnNonFinalField
         synchronized (messageQ) {
             msg = messageQ.poll();
             messageQ.notifyAll();    // notify reader thread of new space
@@ -177,10 +142,9 @@ public class BitPeer {
     }
 
     /* write:  write bytes out to socket */
-    public int write(byte[] sendData, int offset, int len) {
-        int numWritten = 0;
+    public void write(byte[] sendData, int offset, int len) {
         if (outToPeer == null) {
-            return 0;
+            return;
         }
 
         try {
@@ -189,12 +153,11 @@ public class BitPeer {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-        return numWritten;
     }
 
     /* sendHandshake: open socket to peer and send handshake message */
     /* return 0 on success, -1 on failure */
-    public int sendHandshake(String encoded) {
+    public void sendHandshake(String encoded) {
         // open connection socket
         try {
             // send handshake
@@ -203,10 +166,8 @@ public class BitPeer {
             outToPeer.flush();
         } catch (IOException ex) {
             System.err.println("error: could not initiate connection");
-            return -1;
         }
 
-        return 0;
     }
 
     /* receiveHandshake: receive, verify, respond to handshake pattern */
@@ -245,8 +206,8 @@ public class BitPeer {
         }
 
         // initialize reader to read from socket
-        this.messageQ = new LinkedList<BitMessage>();
-        this.reader = new BitReader(inFromPeer, messageQ);
+        this.messageQ = new LinkedList<>();
+        BitReader reader = new BitReader(inFromPeer, messageQ);
         Thread t = new Thread(reader);
         t.start();
 
@@ -260,12 +221,7 @@ public class BitPeer {
         // (i) byte=19 followed by "BitTorrent protocol"
         byte b = 19;
         handshakeMsg.put(b);
-        try {
-            handshakeMsg.put("BitTorrent protocol".getBytes("US-ASCII"));
-        } catch (UnsupportedEncodingException ex) {
-            ex.printStackTrace();
-            return null;
-        }
+        handshakeMsg.put("BitTorrent protocol".getBytes(StandardCharsets.US_ASCII));
         // (ii) 8-byte extension (here we use all zeroes)
         byte[] pad = new byte[8];
         for (int i = 0; i < 8; ++i) {
@@ -273,16 +229,12 @@ public class BitPeer {
         }
         handshakeMsg.put(pad);
         // (iii) 20-byte SHA1 encoding of bencoded metainfo (diff. from protocol)
-        handshakeMsg.put(BitLibrary.getSHA1(encoded));
+        handshakeMsg.put(Objects.requireNonNull(BitLibrary.getSHA1(encoded)));
         // (iv) 20-byte peer ID (SHA1 encoding of IP and port)
         handshakeMsg.put(peerID);
         handshakeMsg.flip();    // prepare for writing
 
         return handshakeMsg.array();
-    }
-
-    public Socket getSocket() {
-        return peerSocket;
     }
 
     public InetAddress getIP() {
@@ -293,7 +245,4 @@ public class BitPeer {
         return peerAddrPort.getPort();
     }
 
-    public String getHostName() {
-        return peerAddrPort.getHostName();
-    }
 }

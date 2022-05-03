@@ -9,20 +9,15 @@
 
 package util.bencode;
 
-import util.bencode.BList;
-import util.bencode.BDict;
-import util.bencode.BNumber;
-import util.bencode.BString;
-
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class BDecoder {
     /* read:  parses an encoded string into Bobjects */
     public static BObject[] read(final String str) {
         AtomicInteger pos = new AtomicInteger(0);
-        List<BObject> tokens = new ArrayList<BObject>();
+        List<BObject> tokens = new ArrayList<>();
 
         while (pos.get() < str.length()) {
             BObject obj = read(str, pos);
@@ -31,7 +26,7 @@ public class BDecoder {
             }
             tokens.add(obj);
         }
-        return tokens.toArray(new BObject[tokens.size()]);
+        return tokens.toArray(new BObject[0]);
     }
 
     /* read:  parse the next token of Bencoded str */

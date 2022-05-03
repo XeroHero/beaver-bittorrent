@@ -9,17 +9,9 @@ package util.bencode;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class BNumber implements BObject {
-    private int number;
+    private final int number;
 
     public BNumber(final int n) {
-        this.number = n;
-    }
-
-    public int getNumber() {
-        return number;
-    }
-
-    public void setNumber(final int n) {
         this.number = n;
     }
 
@@ -34,7 +26,7 @@ public class BNumber implements BObject {
             pos.getAndIncrement();
         }
 
-        int value = 0;
+        int value;
         final int endPos = str.indexOf('e', pos.get());
         try {
             value = Integer.parseInt(str.substring(pos.get(), endPos));

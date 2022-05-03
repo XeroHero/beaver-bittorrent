@@ -2,15 +2,14 @@
 /* main purpose is to provide non-blocking acceptance of new peers */
 /* Christopher Chute */
 
-import java.net.Socket;
-import java.net.ServerSocket;
-import java.net.SocketException;
 import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.LinkedList;
 
 public class BitWelcomer extends Thread {
     private ServerSocket welcomeSocket = null;  // welcome new peers
-    private LinkedList<Socket> welcomeQ = null; // pending new peers
+    private final LinkedList<Socket> welcomeQ; // pending new peers
     private volatile boolean isStopped = false;
 
     public BitWelcomer(int welcomePort, final LinkedList<Socket> welcomeQ) {
@@ -32,7 +31,7 @@ public class BitWelcomer extends Thread {
     /* run:  continually loop to accept new BitTorrent peers */
     public void run() {
         while (!isStopped) {
-            Socket peerSocket = null;
+            Socket peerSocket;
             try {
                 peerSocket = welcomeSocket.accept();
             } catch (Exception ex) {

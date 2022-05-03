@@ -6,10 +6,9 @@
 
 package util.bencode;
 
-import util.bencode.BObject;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 /* BDict:  BObject for Bencode dictionary */
@@ -22,8 +21,7 @@ public class BDict extends HashMap<String, BObject> implements BObject {
         buf.append('d');
 
         for (final Map.Entry<String, BObject> elt : entrySet()) {
-            buf.append(elt.getKey().length() + ":" + elt.getKey()
-                       + elt.getValue().encode());
+            buf.append(elt.getKey().length()).append(":").append(elt.getKey()).append(elt.getValue().encode());
         }
         buf.append('e');
 
@@ -53,8 +51,7 @@ public class BDict extends HashMap<String, BObject> implements BObject {
         final StringBuilder buf = new StringBuilder();
         buf.append("Dictionary:\n");
         for (final Map.Entry<String, BObject> elt : entrySet()) {
-            buf.append(elt.getKey() + 
-                       " -> " + elt.getValue().print() + "\n");
+            buf.append(elt.getKey()).append(" -> ").append(elt.getValue().print()).append("\n");
         }
 
         return buf.toString();

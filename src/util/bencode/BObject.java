@@ -7,18 +7,18 @@
 package util.bencode;
 
 public interface BObject {
-    public enum BObjectType {
+    enum BObjectType {
         BDICT,
         BSTRING,
         BNUMBER,
         BLIST
     }
     /* encode:  convert BObject to Bencoded string representation */
-    public String encode();
+    String encode();
 
     /* print:  produce a human-readable string */
-    public String print();
+    String print();
 
     /* getType:  returns type of BObject */
-    public BObjectType getType();
+    BObjectType getType();
 }

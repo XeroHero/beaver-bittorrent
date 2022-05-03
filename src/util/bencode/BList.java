@@ -48,7 +48,7 @@ public class BList extends ArrayList<BObject> implements BObject {
         final StringBuilder buf = new StringBuilder();
         buf.append("List:\n");
         for (final BObject obj : this) {
-            buf.append(obj.print() + "\n");
+            buf.append(obj.print()).append("\n");
         }
 
         return buf.toString();

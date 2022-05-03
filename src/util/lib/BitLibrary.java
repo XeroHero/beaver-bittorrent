@@ -3,27 +3,18 @@
 
 package util.lib;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-import java.nio.channels.*;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Formatter;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 public class BitLibrary {
     /* getRandomSet:  returns an array of n (or hi - lo, whichever is smaller) */
     /* random integers from the range [lo, hi) */
     public static Set<Integer> getRandomSet(int n, int lo, int hi) {
         Random random = new Random(System.currentTimeMillis());
-        HashSet<Integer> s = new HashSet<Integer>();
+        HashSet<Integer> s = new HashSet<>();
         while (s.size() < n && s.size() < hi - lo) {
             s.add(random.nextInt(hi) + lo);
         }
@@ -31,13 +22,13 @@ public class BitLibrary {
     }
 
     public static String bytesToHex(final byte[] hash) {
-    	Formatter formatter = new Formatter();
-    	for (byte b : hash) {
-    	    formatter.format("%02x", b);
-    	}
-    	String result = formatter.toString();
-    	formatter.close();
-    	return result;
+        Formatter formatter = new Formatter();
+        for (byte b : hash) {
+            formatter.format("%02x", b);
+        }
+        String result = formatter.toString();
+        formatter.close();
+        return result;
     }
 
     /* bitsToBoolean: convert byte[] bitfield to boolean[] bitfield */
@@ -47,11 +38,7 @@ public class BitLibrary {
         for (int i = 0; i < boolfield.length; ++i) {
             int bytePos = i / 8;
             int bitPos = i % 8;
-            if ((bitfield[bytePos] & (128 >> bitPos)) > 0) {
-                boolfield[i] = true;
-            } else {
-                boolfield[i] = false;
-            }
+            boolfield[i] = (bitfield[bytePos] & (128 >> bitPos)) > 0;
         }
         return boolfield;
     }
@@ -59,9 +46,6 @@ public class BitLibrary {
     /* booleanToBits: convert boolean[] bitfield to byte[] bitfield */
     public static byte[] booleanToBits(boolean[] boolfield) {
         byte[] bitfield = new byte[(boolfield.length / 8) + 1];
-        for (int i = 0; i < bitfield.length; ++i) {
-            bitfield[i] = 0;
-        }
 
         for (int i = 0; i < boolfield.length; ++i) {
             int bytePos = i / 8;
@@ -77,10 +61,9 @@ public class BitLibrary {
 
     /* isAllTrue:  returns true if boolean array is all true values */
     /* e.g., true if array is a bitfield and the download is complete */
-    public static boolean isAllTrue(boolean[] array)
-    {
+    public static boolean isAllTrue(boolean[] array) {
         for (boolean val : array) {
-            if (val == false) {
+            if (!val) {
                 return false;
             }
         }
@@ -127,9 +110,9 @@ public class BitLibrary {
         try {
             md = MessageDigest.getInstance("SHA-1");
             md.reset();
-            byte[] hashData = stringToHash.getBytes("UTF-8");
+            byte[] hashData = stringToHash.getBytes(StandardCharsets.UTF_8);
             md.update(hashData);
-        } catch (NoSuchAlgorithmException|UnsupportedEncodingException ex) {
+        } catch (NoSuchAlgorithmException ex) {
             ex.printStackTrace();
         }
         if (md == null) {
@@ -138,13 +121,4 @@ public class BitLibrary {
         return md.digest();
     }
 
-    /* writeByteBuffer:  writes a byte buffer out to the output stream */
-    public static void writeByteBuffer(ByteBuffer buf, OutputStream out) {
-        WritableByteChannel channel = Channels.newChannel(out);
-        try {
-            channel.write(buf);
-        } catch (IOException ex) {
-
-        }
-    }
 }

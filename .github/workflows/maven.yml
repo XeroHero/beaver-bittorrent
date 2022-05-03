@@ -26,3 +26,6 @@ jobs:
       run: mvn -B package --file pom.xml
     - name: Package JAR with Maven
       run: mvn package
+    - name: Automatic Releases
+      uses: marvinpinto/action-automatic-releases@v1.2.1
+
